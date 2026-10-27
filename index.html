@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BloomBudget | Personal Expense Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#"><span class="brand-icon">✿</span><span>Bloom<span class="brand-light">Budget</span></span></a>
+      <div class="side-label">WORKSPACE</div>
+      <button class="nav-link active" data-view="dashboard"><span>▦</span> Dashboard</button>
+      <button class="nav-link" data-view="transactions"><span>⇄</span> Transactions</button>
+      <button class="nav-link" data-view="analytics"><span>◔</span> Analytics</button>
+      <button class="nav-link" data-view="budget"><span>◎</span> Budget planner</button>
+      <div class="sidebar-bottom">
+        <div class="tip-card"><span class="tip-spark">✦</span><strong>Little steps add up!</strong><p>Keep an eye on your spending and make your money work for you.</p></div>
+        <button id="themeToggle" class="theme-toggle"><span>☾</span> Switch to dark mode</button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div><p class="eyebrow" id="todayLabel">YOUR MONEY, IN BLOOM</p><h1 id="pageTitle">Good day! <span>✦</span></h1><p class="subtitle">Here’s your financial snapshot.</p></div>
+        <div class="top-actions"><span class="date-pill" id="todayDate"></span><button class="primary-btn" id="addTopBtn">＋ Add transaction</button></div>
+      </header>
+
+      <section class="view-section active-view" id="dashboardView">
+        <div class="summary-grid">
+          <article class="summary-card balance-card"><div class="card-top"><span class="card-label">Total balance</span><span class="card-icon">💎</span></div><div class="amount" id="totalBalance">₹0.00</div><div class="card-foot"><span class="mini-dot"></span> Income minus expenses</div><div class="decor-circle"></div></article>
+          <article class="summary-card income-card"><div class="card-top"><span class="card-label">Total income</span><span class="card-icon">↗</span></div><div class="amount" id="totalIncome">₹0.00</div><div class="card-foot">Money coming in</div></article>
+          <article class="summary-card expense-card"><div class="card-top"><span class="card-label">Total expenses</span><span class="card-icon">↘</span></div><div class="amount" id="totalExpense">₹0.00</div><div class="card-foot">Money going out</div></article>
+          <article class="summary-card savings-card"><div class="card-top"><span class="card-label">Savings rate</span><span class="card-icon">🌱</span></div><div class="amount" id="savingsRate">0%</div><div class="card-foot">Of your total income</div></article>
+        </div>
+
+        <div class="content-grid">
+          <article class="panel chart-panel"><div class="panel-heading"><div><h2>Cash flow</h2><p>Income vs. expenses over time</p></div><select id="cashFlowPeriod" class="select-control"><option value="6">Last 6 months</option><option value="12">Last 12 months</option></select></div><div class="chart-wrap"><canvas id="cashFlowChart"></canvas></div></article>
+          <article class="panel budget-panel"><div class="panel-heading"><div><h2>Monthly budget</h2><p>Keep your spending in check</p></div><span class="round-icon">◎</span></div><div class="budget-number"><strong id="budgetSpent">₹0</strong><span id="budgetLimitText">of ₹10,000</span></div><div class="progress-track"><div id="budgetProgress" class="progress-fill"></div></div><div class="budget-meta"><span id="budgetPercent">0% used</span><button class="text-button" data-view="budget">Manage budget →</button></div><p class="budget-message" id="budgetMessage">You're off to a great start!</p></article>
+        </div>
+
+        <div class="content-grid lower-grid">
+          <article class="panel"><div class="panel-heading"><div><h2>Spending breakdown</h2><p>Where your money goes</p></div><span class="soft-badge">This month</span></div><div class="donut-wrap"><canvas id="categoryChart"></canvas></div><div id="categoryLegend" class="category-legend"></div></article>
+          <article class="panel"><div class="panel-heading"><div><h2>Recent transactions</h2><p>Your latest money moves</p></div><button class="text-button" data-view="transactions">View all →</button></div><div id="recentTransactions" class="transaction-list"></div></article>
+        </div>
+      </section>
+
+      <section class="view-section" id="transactionsView">
+        <div class="panel">
+          <div class="panel-heading page-panel-heading"><div><h2>All transactions</h2><p>Search, filter, edit or remove a record.</p></div><button class="primary-btn" id="addTransactionBtn">＋ Add transaction</button></div>
+          <div class="filters"><input id="searchInput" type="search" placeholder="⌕  Search description..."><select id="typeFilter" class="select-control"><option value="all">All types</option><option value="income">Income</option><option value="expense">Expense</option></select><select id="categoryFilter" class="select-control"><option value="all">All categories</option></select><input id="fromDate" type="date" aria-label="From date"><input id="toDate" type="date" aria-label="To date"><button id="resetFilters" class="secondary-btn">Reset</button></div>
+          <div class="table-scroll"><table><thead><tr><th>Transaction</th><th>Category</th><th>Date</th><th>Type</th><th>Amount</th><th>Actions</th></tr></thead><tbody id="transactionTable"></tbody></table></div>
+          <div id="transactionCount" class="table-footer"></div>
+        </div>
+        <div class="export-row"><button class="secondary-btn" id="exportBtn">↓ Export CSV</button><button class="danger-outline" id="clearBtn">Clear all transactions</button></div>
+      </section>
+
+      <section class="view-section" id="analyticsView">
+        <div class="content-grid analytics-grid">
+          <article class="panel"><div class="panel-heading"><div><h2>Expense by category</h2><p>Current month overview</p></div></div><div class="chart-wrap tall"><canvas id="analyticsBarChart"></canvas></div></article>
+          <article class="panel"><div class="panel-heading"><div><h2>Monthly summary</h2><p>Totals for the current month</p></div></div><div class="analytics-stat"><span>Income</span><strong class="positive" id="analyticsIncome">₹0</strong></div><div class="analytics-stat"><span>Expenses</span><strong class="negative" id="analyticsExpense">₹0</strong></div><div class="analytics-stat"><span>Net savings</span><strong id="analyticsNet">₹0</strong></div><div class="analytics-stat"><span>Savings rate</span><strong id="analyticsRate">0%</strong></div></article>
+        </div>
+      </section>
+
+      <section class="view-section" id="budgetView">
+        <div class="budget-layout">
+          <article class="panel budget-settings"><div class="panel-heading"><div><h2>Budget planner</h2><p>Give your money a plan.</p></div><span class="round-icon">✦</span></div><form id="budgetForm"><label for="monthlyBudget">Monthly spending limit (₹)</label><input type="number" id="monthlyBudget" min="1" step="1" required placeholder="10000"><label for="budgetMonth">Budget month</label><input type="month" id="budgetMonth" required><button class="primary-btn full-btn" type="submit">Save budget</button></form><div class="budget-note">Tip: Set a realistic limit and review it as your needs change.</div></article>
+          <article class="panel"><div class="panel-heading"><div><h2>Budget health</h2><p>Your progress this month</p></div></div><div class="budget-health-circle" id="budgetHealthCircle"><div><strong id="healthPercent">0%</strong><span>used</span></div></div><div class="health-caption" id="healthCaption">You're within your budget. Keep it up!</div><div class="analytics-stat"><span>Spent so far</span><strong id="budgetPageSpent">₹0</strong></div><div class="analytics-stat"><span>Remaining</span><strong id="budgetRemaining">₹10,000</strong></div></article>
+        </div>
+      </section>
+      <footer class="footer">Made with <span>♥</span> for healthier money habits · Your data stays in this browser</footer>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="transactionModal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-heading"><div><span class="eyebrow">MONEY MOVES</span><h2 id="modalTitle">Add transaction</h2></div><button class="icon-button" id="modalClose" aria-label="Close">×</button></div>
+      <form id="transactionForm">
+        <input type="hidden" id="editId">
+        <div class="type-choice"><label><input type="radio" name="transactionType" value="expense" checked><span>↘ Expense</span></label><label><input type="radio" name="transactionType" value="income"><span>↗ Income</span></label></div>
+        <label for="description">Description</label><input id="description" type="text" maxlength="80" required placeholder="e.g. Lunch with friends">
+        <div class="form-two"><div><label for="amount">Amount (₹)</label><input id="amount" type="number" min="0.01" step="0.01" required placeholder="250.00"></div><div><label for="transactionDate">Date</label><input id="transactionDate" type="date" required></div></div>
+        <label for="category">Category</label><select id="category" required></select>
+        <label for="notes">Notes (optional)</label><textarea id="notes" rows="2" maxlength="180" placeholder="Add a little detail..."></textarea>
+        <div class="modal-actions"><button type="button" class="secondary-btn" id="cancelModal">Cancel</button><button type="submit" class="primary-btn" id="saveTransaction">Save transaction</button></div>
+      </form>
+    </div>
+  </div>
+  <div class="toast" id="toast" role="status"></div>
+  <script src="script.js"></script>
+</body>
+</html>
